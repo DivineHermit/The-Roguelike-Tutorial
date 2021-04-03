@@ -10,6 +10,11 @@ def main() -> None:
     screen_width = 80
     screen_height = 50
 
+    # player location variables: use of int() prevents floats being returned from division
+
+    player_x = int(screen_width / 2)
+    player_y = int(screen_height / 2)
+
     # load image with the tileset to be used (I stored this in a 'data' folder)
     tileset = tcod.tileset.load_tilesheet(
         "data/dejavu10x10_gs_tc.png", 32, 8, tcod.tileset.CHARMAP_TCOD
@@ -31,7 +36,7 @@ def main() -> None:
         # the game loop
         while True:
             # place an '@' on screen at the location of x & y
-            root_console.print(x=40, y=25, string="@")
+            root_console.print(player_x, player_y, string="@")
             # update the screen so we can actually see the '@'
             context.present(root_console)
             # event handling: wait for some user input and loop through each 'event'
