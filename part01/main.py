@@ -4,7 +4,6 @@
 import tcod
 
 from actions import EscapeAction, MovementAction
-from entity import Entity
 from input_handlers import EventHandler
 
 
@@ -14,6 +13,11 @@ def main() -> None:
     screen_width = 80
     screen_height = 50
 
+    # player location variables: use of int() prevents floats being returned from division
+
+    player_x = int(screen_width / 2)
+    player_y = int(screen_height / 2)
+
     # load image with the tileset to be used (I stored this in a 'data' folder)
     tileset = tcod.tileset.load_tilesheet(
         "data/dejavu10x10_gs_tc.png", 32, 8, tcod.tileset.CHARMAP_TCOD
@@ -21,11 +25,6 @@ def main() -> None:
 
     # create an event handler
     event_handler = EventHandler()
-
-    # create entities: player & npc
-    player = Entity(int(screen_width / 2), int(screen_height / 2), '@', (255, 255, 255))
-    npc = Entity(int(screen_width / 2 - 5), int(screen_height / 2), '@', (255, 255, 0))
-    entities = {npc, player}
 
     # create the console window, set the tileset & title
     with tcod.context.new_terminal(
@@ -42,9 +41,9 @@ def main() -> None:
 
         # the game loop
         while True:
-            # display the player '@' on screen using its data
-            root_console.print(x=player.x, y=player.y, string=player.char, fg=player.color)
-            # update the screen so we can actually see the player
+            # place an '@' on screen at the location of x & y
+            root_console.print(player_x, player_y, string="@")
+            # update the screen so we can actually see the '@'
             context.present(root_console)
             # clear console to prevent 'trailing'
             root_console.clear()
@@ -58,7 +57,8 @@ def main() -> None:
                 # handle 'MovementAction'
                 if isinstance(action, MovementAction):
                     # move the player
-                    player.move(dx=action.dx, dy=action.dy)
+                    player_x += action.dx
+                    player_y += action.dy
                 # handle 'EscapeAction' (for now quit/could be a menu)
                 elif isinstance(action, EscapeAction):
                     raise SystemExit()
