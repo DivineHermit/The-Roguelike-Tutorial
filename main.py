@@ -3,6 +3,9 @@
 
 import tcod
 
+from actions import EscapeAction, MovementAction
+from input_handlers import EventHandler
+
 
 def main() -> None:
     """  """
@@ -19,6 +22,9 @@ def main() -> None:
     tileset = tcod.tileset.load_tilesheet(
         "data/dejavu10x10_gs_tc.png", 32, 8, tcod.tileset.CHARMAP_TCOD
     )
+
+    # create an event handler
+    event_handler = EventHandler()
 
     # create the console window, set the tileset & title
     with tcod.context.new_terminal(
@@ -39,11 +45,22 @@ def main() -> None:
             root_console.print(player_x, player_y, string="@")
             # update the screen so we can actually see the '@'
             context.present(root_console)
+            # clear console to prevent 'trailing'
+            root_console.clear()
             # event handling: wait for some user input and loop through each 'event'
             for event in tcod.event.wait():
-                # if the console is closed
-                if event.type == "QUIT":
-                    # tell Python to quit
+                # pass the event to our 'EventHandler'
+                action = event_handler.dispatch(event)
+                # if no valid actions exist keep looping
+                if action is None:
+                    continue
+                # handle 'MovementAction'
+                if isinstance(action, MovementAction):
+                    # move the player
+                    player_x += action.dx
+                    player_y += action.dy
+                # handle 'EscapeAction' (for now quit/could be a menu)
+                elif isinstance(action, EscapeAction):
                     raise SystemExit()
 
 
