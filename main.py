@@ -3,7 +3,7 @@
 
 import tcod
 
-from actions import EscapeAction, MovementAction
+from engine import Engine
 from entity import Entity
 from input_handlers import EventHandler
 
@@ -27,6 +27,9 @@ def main() -> None:
     npc = Entity(int(screen_width / 2 - 5), int(screen_height / 2), '@', (255, 255, 0))
     entities = {npc, player}
 
+    # create game engine for event handling and rendering
+    engine = Engine(entities=entities, event_handler=event_handler, player=player)
+
     # create the console window, set the tileset & title
     with tcod.context.new_terminal(
             screen_width,
@@ -42,26 +45,12 @@ def main() -> None:
 
         # the game loop
         while True:
-            # display the player '@' on screen using its data
-            root_console.print(x=player.x, y=player.y, string=player.char, fg=player.color)
-            # update the screen so we can actually see the player
-            context.present(root_console)
-            # clear console to prevent 'trailing'
-            root_console.clear()
-            # event handling: wait for some user input and loop through each 'event'
-            for event in tcod.event.wait():
-                # pass the event to our 'EventHandler'
-                action = event_handler.dispatch(event)
-                # if no valid actions exist keep looping
-                if action is None:
-                    continue
-                # handle 'MovementAction'
-                if isinstance(action, MovementAction):
-                    # move the player
-                    player.move(dx=action.dx, dy=action.dy)
-                # handle 'EscapeAction' (for now quit/could be a menu)
-                elif isinstance(action, EscapeAction):
-                    raise SystemExit()
+            # handle game display
+            engine.render(console=root_console, context=context)
+            # get game events
+            events = tcod.event.wait()
+            # handle events and determine actions
+            engine.handle_events(events)
 
 
 if __name__ == "__main__":
